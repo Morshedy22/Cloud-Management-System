@@ -63,30 +63,33 @@ class docker:
         cmd = f"docker build -t {imgname} -f {directory} {second_direct}"
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
         return result
-    def list_images():
+    def list_images(self):
         cmd="docker images"
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
         return result
     
-    def run_image_with_container(imgname,containername):
+    def run_image_with_container(self,imgname,containername):
         cmd= f"docker run --name {containername} {imgname}"
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
         return result
 
-    def list_containers():
+    def list_containers(self):
       command= f"docker images"
       result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
       return result
-    def stop_container(name):
+    def stop_container(self,name):
         command= f"docker stop {name}"
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
         return result
-    def search_image(name):
+    def search_image(self,name):
         command= f"docker search {name}"
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
         return result
-    def pull_image(name):
+    def pull_image(self,name):
         command=f"docker pull {name}"
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
         return result
-
+    def list_all_containers(self):
+        command= "docker ps -a"
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        return result
