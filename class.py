@@ -78,7 +78,7 @@ class VMManagerGUI:
                                            font=("Helvetica", 14))
         self.pull_image_button.grid(row=6, column=5, columnspan=2, pady=15)
 
-     def show_container_list():
+     def show_container_list(self):
          try:
              result = self.docker_instance.list_containers()
              container_list = result.stdout
@@ -183,7 +183,7 @@ class VMManagerGUI:
 
         def run_image():
             name= name_entry.get()
-            di
+            
             r = dir_entry.get()
 
             try:
