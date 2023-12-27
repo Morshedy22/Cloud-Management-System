@@ -9,29 +9,53 @@ class docker:
         self.imageused=imageused
         
 
-    def buildfile(self):
-        try:
-            content=f"""\
-            FROM {self.imageused}
+    def buildfile(self,case):
+        if case=="1":
+            try:
+                content=f"""\
+                FROM {self.imageused}
 
-            WORKDIR {self.workdirectory}
+                WORKDIR {self.workdirectory}
 
-            COPY {self.directoryoffile} {self.workdirectory}
+                COPY {self.directoryoffile} {self.workdirectory}
 
-            RUN pip install --no-cache-dir {self.dependencies}
+                RUN pip install --no-cache-dir {self.dependencies}
 
-            EXPOSE {self.port}
+                EXPOSE {self.port}
 
-        
-            CMD ["python", "{self.filerunname}"]
-            """ 
-            full_path= self.directoryoffile + "/Dockerfile"
-            with open(full_path, "w") as dockerfile:
-                dockerfile.write(content)
             
-            return True
-        except:
-            return False
+                CMD ["python", "{self.filerunname}"]
+                """ 
+                full_path= self.directoryoffile + "/Dockerfile"
+                with open(full_path, "w") as dockerfile:
+                    dockerfile.write(content)
+                
+                return True
+            except:
+                return False
+        else:
+            try:
+                content=f"""\
+                FROM {self.imageused}
+
+                WORKDIR {self.workdirectory}
+
+                COPY {self.directoryoffile} {self.workdirectory}
+
+                RUN pip install --no-cache-dir -r requirements.txt
+
+                EXPOSE {self.port}
+
+            
+                CMD ["python", "{self.filerunname}"]
+                """ 
+                full_path= self.directoryoffile + "/Dockerfile"
+                with open(full_path, "w") as dockerfile:
+                    dockerfile.write(content)
+                
+                return True
+            except:
+                return False
         
     def build_image(self,imgname,directory):
         #input locate a file first
