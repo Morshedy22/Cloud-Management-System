@@ -69,12 +69,12 @@ class docker:
         return result
     
     def run_image_with_container(self,imgname,containername):
-        cmd= f"docker run --name {containername} {imgname}"
+        cmd= f"docker run -d --name {containername} {imgname}"
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
         return result
 
     def list_containers(self):
-      command= f"docker images"
+      command= f"docker ps"
       result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
       return result
     def stop_container(self,name):
@@ -92,4 +92,4 @@ class docker:
     def list_all_containers(self):
         command= "docker ps -a"
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
-        return result
+        return result.stdout

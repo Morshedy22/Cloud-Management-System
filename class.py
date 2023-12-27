@@ -93,6 +93,11 @@ class VMManagerGUI:
                                            font=("Helvetica", 14))
         self.pull_image_button.grid(row=6, column=5, columnspan=2, pady=15)
 
+        self.list_all_container = tk.Button(self.docker_frame, text="List all containers",
+                                             command= lambda: self.show_output_popup("List All containers Result", docker_instance.list_all_containers()), bg=self.button_color, fg="white",
+                                             font=("Helvetica", 14))
+        self.list_all_container.grid(row=6, column=3, columnspan=2, pady=15)
+
      def create_dockerfile_popup(self):
          def select_directory(entry):
             directory = filedialog.askdirectory()
@@ -171,10 +176,7 @@ class VMManagerGUI:
              result = docker_instance.list_containers()
              container_list = result.stdout
 
-             # Clear the existing text in the text widget
-             self.container_list_text.delete(1.0, tk.END)
-             # Insert the new container list into the text widget
-             self.container_list_text.insert(tk.END, container_list)
+             self.show_output_popup("Show All running contianers", container_list)
 
          except subprocess.CalledProcessError as e:
              self.show_output_popup("List Docker Containers Error", e.stderr)
@@ -185,6 +187,7 @@ class VMManagerGUI:
         # Check if the user clicked Cancel or entered an empty string
         if ask_pullimage_name is not None and ask_pullimage_name.strip() != "":
             result = docker_instance.pull_image(ask_pullimage_name)  # Call pull_image as a method
+            self.show_output_popup("Pull an image", result.stdout)
             # Handle the result or update the GUI accordingly
 
      def ask_image_name(self):
@@ -193,7 +196,9 @@ class VMManagerGUI:
 
         # Check if the user clicked Cancel or entered an empty string
         if image_name is not None and image_name.strip() != "":
-            result = docker_instance.search_image(image_name)  # Call search_image as a method
+            result = docker_instance.search_image(image_name)
+            self.show_output_popup("Search for image", result.stdout)
+              # Call search_image as a method
             # Handle the result or update the GUI accordingly
 
      def ask_container_name(self):
@@ -210,7 +215,8 @@ class VMManagerGUI:
 
         # Check if the user clicked Cancel or entered an empty string
         if container_name is not None and container_name.strip() != "":
-            result = docker_instance.stop_container(container_name)
+            self.Stop_container_popup(name=container_name)
+
             # Handle the result or update the GUI accordingly
      def run_docker_image_with_container_popup(self):
         popup = tk.Toplevel(self.docker_frame)
@@ -325,16 +331,34 @@ class VMManagerGUI:
 
         except subprocess.CalledProcessError as e:
             self.show_output_popup("List Docker Images Error", e.stderr)
+    
+     def Stop_container_popup(self,name):
+        lists=docker_instance.list_containers().stdout.split()
+        found=False
+        for i in range(19,len(lists),12):
+            if lists[i]==name:
+                found=True
 
+        
+        if found:
+            try:
+                docker_instance.stop_container(name)
+                
+                self.show_output_popup("Stop container", "Container was stopped succesfully")
 
+            except subprocess.CalledProcessError as e:
+                self.show_output_popup("Stop container", "There is no running container with this name")
+        else:
+            self.show_output_popup("Stop container", "There is no running container with this name")
+        
 
      def show_output_popup(self, title, content):
         output_popup = tk.Toplevel(self.master)
         output_popup.title(title)
-        output_popup.geometry("400x300")
-        output_popup.resizable(False, False)
+        output_popup.geometry("1000x600")
+        output_popup.resizable(True, True)
 
-        text_widget = tk.Text(output_popup, wrap='word', height=15, width=50)
+        text_widget = tk.Text(output_popup, wrap='word', height=50, width=130)
         text_widget.insert(tk.END, content)
         text_widget.pack(padx=10, pady=10)
 
