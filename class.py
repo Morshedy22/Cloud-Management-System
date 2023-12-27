@@ -4,13 +4,12 @@ from qemuClass import*
 import subprocess
 from dockerClass import *
 
-
+docker_instance=docker()
 
 class VMManagerGUI:
 
      def __init__(self, master):
         self.master = master
-        
         master.title("VM Manager and Dockerfile Generator")
         master.resizable(False, False)
         # Set a color scheme
@@ -19,7 +18,7 @@ class VMManagerGUI:
         self.button_color = "#F9A03F"  # Orange
 
         master.configure(bg=self.background_color)
-
+        
         # create object virtual machine
         self.vm = VirtualMachine()
         # create object virtual machine
@@ -146,14 +145,14 @@ class VMManagerGUI:
                  port = port_entry.get()
                  file_run_name = runname_entry.get()
 
-                 docker.imageused = image_used
-                 docker.workdirectory = work_directory
-                 docker.directoryoffile = directory_of_file
-                 docker.dependencies = dependencies
-                 docker.port = port
-                 docker.filerunname = file_run_name
+                 docker_instance.imageused = image_used
+                 docker_instance.workdirectory = work_directory
+                 docker_instance.directoryoffile = directory_of_file
+                 docker_instance.dependencies = dependencies
+                 docker_instance.port = port
+                 docker_instance.filerunname = file_run_name
 
-                 result = docker.buildfile()
+                 result = docker_instance.buildfile()
                  if result:
                      self.show_output_popup("Build Dockerfile Result", "Dockerfile created successfully.")
                  else:
@@ -169,7 +168,7 @@ class VMManagerGUI:
 
      def show_container_list(self):
          try:
-             result = docker.list_containers()
+             result = docker_instance.list_containers()
              container_list = result.stdout
 
              # Clear the existing text in the text widget
@@ -185,7 +184,7 @@ class VMManagerGUI:
 
         # Check if the user clicked Cancel or entered an empty string
         if ask_pullimage_name is not None and ask_pullimage_name.strip() != "":
-            result = docker.pull_image(ask_pullimage_name)  # Call pull_image as a method
+            result = docker_instance.pull_image(ask_pullimage_name)  # Call pull_image as a method
             # Handle the result or update the GUI accordingly
 
      def ask_image_name(self):
@@ -194,7 +193,7 @@ class VMManagerGUI:
 
         # Check if the user clicked Cancel or entered an empty string
         if image_name is not None and image_name.strip() != "":
-            result = docker.search_image(image_name)  # Call search_image as a method
+            result = docker_instance.search_image(image_name)  # Call search_image as a method
             # Handle the result or update the GUI accordingly
 
      def ask_container_name(self):
@@ -203,7 +202,7 @@ class VMManagerGUI:
 
         # Check if the user clicked Cancel or entered an empty string
         if container_name is not None and container_name.strip() != "":
-            result = docker.list_containers(container_name)
+            result = docker_instance.list_containers(container_name)
             # Handle the result or update the GUI accordingly
      def ask_container_name_stop(self):
         # Create a simple dialog to get the container name
@@ -211,7 +210,7 @@ class VMManagerGUI:
 
         # Check if the user clicked Cancel or entered an empty string
         if container_name is not None and container_name.strip() != "":
-            result = docker.stop_container(container_name)
+            result = docker_instance.stop_container(container_name)
             # Handle the result or update the GUI accordingly
      def run_docker_image_with_container_popup(self):
         popup = tk.Toplevel(self.docker_frame)
@@ -239,7 +238,7 @@ class VMManagerGUI:
             container_name = container_name_entry.get()
 
             try:
-                result = docker.run_image_with_container(img_name, container_name)
+                result = docker_instance.run_image_with_container(img_name, container_name)
                 self.show_output_popup("Run Docker Image with Container Result", result.stdout)
 
             except subprocess.CalledProcessError as e:
@@ -276,7 +275,7 @@ class VMManagerGUI:
             r = dir_entry.get()
 
             try:
-                result = docker.build_image(name, dir)
+                result = docker_instance.build_image(name, dir)
                 self.show_output_popup("build Docker Image w Result", result.stdout)
 
             except subprocess.CalledProcessError as e:
@@ -321,7 +320,7 @@ class VMManagerGUI:
 
      def list_images_popup(self):
         try:
-            result = docker.list_images()
+            result = docker_instance.list_images()
             self.show_output_popup("List Docker Images Result", result.stdout)
 
         except subprocess.CalledProcessError as e:
