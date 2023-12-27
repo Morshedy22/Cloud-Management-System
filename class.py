@@ -41,6 +41,19 @@ class VMManagerGUI:
         self.create_vm_button.grid(row=3, column=0, columnspan=2, pady=15)
 
         # Create Dockerfile Frame
+
+
+        self.dockerfile_label = tk.Label(self.docker_frame, text="Create Dockerfile",
+                                         font=("Helvetica", 20, "bold"),
+                                         bg=self.frame_color, fg="white")
+        self.dockerfile_label.grid(row=0, column=3, columnspan=2, pady=15)
+
+        self.create_dockerfile_button = tk.Button(self.docker_frame, text="Create Dockerfile",
+                                                  command=self.create_dockerfile_popup, bg=self.button_color,
+                                                  fg="white",
+                                                  font=("Helvetica", 14))
+        self.create_dockerfile_button.grid(row=5, column=3, columnspan=2, pady=15)
+
         self.build_docker_button = tk.Button(self.docker_frame, text="Build Docker Image",
                                              command=self.build_docker_image_popup, bg=self.button_color, fg="white",
                                              font=("Helvetica", 14))
@@ -78,7 +91,66 @@ class VMManagerGUI:
                                            font=("Helvetica", 14))
         self.pull_image_button.grid(row=6, column=5, columnspan=2, pady=15)
 
-     def show_container_list(self):
+     def create_dockerfile_popup(self):
+         popup = tk.Toplevel(self.docker_frame)
+         popup.title("Create Dockerfile")
+         popup.geometry("400x300")
+         popup.resizable(False, False)
+
+         # Entry widgets for Dockerfile information
+         image_entry = tk.Entry(popup, width=20)
+         image_entry.grid(row=0, column=1, padx=10, pady=10)
+         workdir_entry = tk.Entry(popup, width=20)
+         workdir_entry.grid(row=1, column=1, padx=10, pady=10)
+         dir_entry = tk.Entry(popup, width=20)
+         dir_entry.grid(row=2, column=1, padx=10, pady=10)
+         dependencies_entry = tk.Entry(popup, width=20)
+         dependencies_entry.grid(row=3, column=1, padx=10, pady=10)
+         port_entry = tk.Entry(popup, width=20)
+         port_entry.grid(row=4, column=1, padx=10, pady=10)
+         runname_entry = tk.Entry(popup, width=20)
+         runname_entry.grid(row=5, column=1, padx=10, pady=10)
+
+         # Labels for Entry widgets
+         tk.Label(popup, text="Image Used:").grid(row=0, column=0, padx=10, pady=10)
+         tk.Label(popup, text="Work Directory:").grid(row=1, column=0, padx=10, pady=10)
+         tk.Label(popup, text="Directory of File:").grid(row=2, column=0, padx=10, pady=10)
+         tk.Label(popup, text="Dependencies:").grid(row=3, column=0, padx=10, pady=10)
+         tk.Label(popup, text="Port:").grid(row=4, column=0, padx=10, pady=10)
+         tk.Label(popup, text="File Run Name:").grid(row=5, column=0, padx=10, pady=10)
+
+         # Function to handle button click
+         def create_dockerfile():
+             try:
+                 image_used = image_entry.get()
+                 work_directory = workdir_entry.get()
+                 directory_of_file = dir_entry.get()
+                 dependencies = dependencies_entry.get()
+                 port = port_entry.get()
+                 file_run_name = runname_entry.get()
+
+                 self.docker_instance.imageused = image_used
+                 self.docker_instance.workdirectory = work_directory
+                 self.docker_instance.directoryoffile = directory_of_file
+                 self.docker_instance.dependencies = dependencies
+                 self.docker_instance.port = port
+                 self.docker_instance.filerunname = file_run_name
+
+                 result = self.docker_instance.buildfile()
+                 if result:
+                     self.show_output_popup("Build Dockerfile Result", "Dockerfile created successfully.")
+                 else:
+                     self.show_output_popup("Build Dockerfile Error", "Error creating Dockerfile.")
+
+                 popup.destroy()
+             except Exception as e:
+                 self.show_output_popup("Build Dockerfile Error", str(e))
+
+         # Button to trigger Dockerfile creation
+         create_button = tk.Button(popup, text="Create Dockerfile", command=create_dockerfile, bg=self.button_color)
+         create_button.grid(row=6, column=0, columnspan=2, pady=10)
+
+     def show_container_list():
          try:
              result = self.docker_instance.list_containers()
              container_list = result.stdout
@@ -183,7 +255,7 @@ class VMManagerGUI:
 
         def run_image():
             name= name_entry.get()
-            
+            di
             r = dir_entry.get()
 
             try:
