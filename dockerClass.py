@@ -33,7 +33,7 @@ class docker:
                 return True
             except:
                 return False
-        else:
+        elif case=="2":
             try:
                 content=f"""\
                 FROM {self.imageused}
@@ -56,6 +56,52 @@ class docker:
                 return True
             except:
                 return False
+        elif case=="3":
+            try:
+                content=f"""\
+                FROM {self.imageused}
+
+                WORKDIR {self.workdirectory}
+
+                COPY {self.directoryoffile} {self.workdirectory}
+
+                RUN pip install --no-cache-dir {self.dependencies}
+
+
+            
+                CMD ["python", "{self.filerunname}"]
+                """ 
+                full_path= self.directoryoffile + "/Dockerfile"
+                with open(full_path, "w") as dockerfile:
+                    dockerfile.write(content)
+                
+                return True
+            except:
+                return False
+        elif case=="2":
+            try:
+                content=f"""\
+                FROM {self.imageused}
+
+                WORKDIR {self.workdirectory}
+
+                COPY {self.directoryoffile} {self.workdirectory}
+
+                RUN pip install --no-cache-dir -r requirements.txt
+
+                
+
+            
+                CMD ["python", "{self.filerunname}"]
+                """ 
+                full_path= self.directoryoffile + "/Dockerfile"
+                with open(full_path, "w") as dockerfile:
+                    dockerfile.write(content)
+                
+                return True
+            except:
+                return False
+
         
     def build_image(self,imgname,directory):
         #input locate a file first
