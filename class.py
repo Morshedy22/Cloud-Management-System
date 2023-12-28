@@ -256,9 +256,18 @@ class VMManagerGUI:
         run_button.grid(row=2, column=0, columnspan=2, pady=10)
 
      def build_docker_image_popup(self):
+        def select_directory(entry):
+            directory = filedialog.askdirectory()
+            if directory:
+                entry.config(state="normal")
+                # Do something with the selected directory (e.g., print it)
+                text_to_write = directory
+                entry.delete(0, tk.END)  # Clear existing content
+                entry.insert(0, text_to_write)
+                entry.config(state="readonly")
         popup = tk.Toplevel(self.docker_frame)
         popup.title("Build Docker Image")
-        popup.geometry("300x150")
+        popup.geometry("400x150")
         popup.resizable(False, False)
 
         # Create labels and entry widgets for image name and directory
@@ -273,16 +282,22 @@ class VMManagerGUI:
 
         dir_entry = tk.Entry(popup, width=20)
         dir_entry.grid(row=1, column=1, padx=10, pady=10)
+        dir_entry.config(state="readonly")
+        select_button = tk.Button(popup, text="Select Directory",command=lambda: select_directory(dir_entry))
+        select_button.grid(row=1,column=2,padx=10,pady=10)
 
 
         def run_image():
             name= name_entry.get()
             
-            r = dir_entry.get()
+            directory = dir_entry.get()
 
             try:
-                result = docker_instance.build_image(name, dir)
-                self.show_output_popup("build Docker Image w Result", result.stdout)
+                output=""
+                result = docker_instance.build_image(name, directory)
+                for line in iter(result.stdout.readline, ""):
+                    output+=line
+                self.show_output_popup("build Docker Image w Result", output)
 
             except subprocess.CalledProcessError as e:
                 self.show_output_popup("build Docker Image Error", e.stderr)

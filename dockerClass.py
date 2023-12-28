@@ -60,9 +60,16 @@ class docker:
     def build_image(self,imgname,directory):
         #input locate a file first
         second_direct=directory[:-12] + "\""
-        cmd = f"docker build -t {imgname} -f {directory} {second_direct}"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
-        return result
+        cmd = f"docker build -t {imgname} \"{directory}\""
+        
+        
+
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+        return process
+          # Auto-scroll to the end
+
+       
+
     def list_images(self):
         cmd="docker images"
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
