@@ -9,17 +9,27 @@ class docker:
         self.imageused=imageused
         
 
-    def buildfile(self,case):
-        if case=="1":
+    def buildfile(self,case_number):
+        command="RUN pip install --no-cache-dir"
+        if case_number=="1" or case_number=="3":
+            self.dependencies=self.dependencies.split()
+            txt=''
+            for i in self.dependencies:
+                txt= txt+ command
+                txt= txt + ' '+i
+                txt+='\n'
+
+            
+        if case_number=="1":
             try:
                 content=f"""\
                 FROM {self.imageused}
 
                 WORKDIR {self.workdirectory}
 
-                COPY {self.directoryoffile} {self.workdirectory}
+                COPY . {self.workdirectory}
 
-                RUN pip install --no-cache-dir {self.dependencies}
+                {txt}
 
                 EXPOSE {self.port}
 
@@ -33,14 +43,14 @@ class docker:
                 return True
             except:
                 return False
-        elif case=="2":
+        elif case_number=="2":
             try:
                 content=f"""\
                 FROM {self.imageused}
 
                 WORKDIR {self.workdirectory}
 
-                COPY {self.directoryoffile} {self.workdirectory}
+                COPY . {self.workdirectory}
 
                 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -56,16 +66,16 @@ class docker:
                 return True
             except:
                 return False
-        elif case=="3":
+        elif case_number=="3":
             try:
                 content=f"""\
                 FROM {self.imageused}
 
                 WORKDIR {self.workdirectory}
 
-                COPY {self.directoryoffile} {self.workdirectory}
+                COPY . {self.workdirectory}
 
-                RUN pip install --no-cache-dir {self.dependencies}
+                {txt}
 
 
             
@@ -78,14 +88,14 @@ class docker:
                 return True
             except:
                 return False
-        elif case=="2":
+        elif case_number=="4":
             try:
                 content=f"""\
                 FROM {self.imageused}
 
                 WORKDIR {self.workdirectory}
 
-                COPY {self.directoryoffile} {self.workdirectory}
+                COPY . {self.workdirectory}
 
                 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -108,10 +118,15 @@ class docker:
         second_direct=directory[:-12] + "\""
         cmd = f"docker build -t {imgname} \"{directory}\""
         
-        
+        output=''
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
-        return process
+        for line in iter(process.stdout.readline, ""):
+            output+=line # Auto-scroll to the end
+
+        process.stdout.close()
+        return_code = process.wait()
+        return output
           # Auto-scroll to the end
 
        
