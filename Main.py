@@ -1,11 +1,13 @@
 import tkinter as tk
 from tkinter import filedialog
-import multiprocess as mp
-from qemuClass import*
+from tkinter import simpledialog
+#import multiprocess as mp
+from qemuClass import *
 import subprocess
 from dockerClass import *
 
-docker_instance=docker()
+docker_instance = docker()
+
 
 class VMManagerGUI:
 
@@ -19,11 +21,10 @@ class VMManagerGUI:
         self.button_color = "#F9A03F"  # Orange
 
         master.configure(bg=self.background_color)
-        
+
         # create object virtual machine
         self.vm = VirtualMachine()
         # create object virtual machine
-        
 
         # Create VM Frame
         self.vm_frame = tk.Frame(master, bg=self.frame_color)
@@ -45,9 +46,6 @@ class VMManagerGUI:
 
         # Create Dockerfile Frame
 
-
-        # Create Dockerfile Frame
-
         self.dockerfile_label = tk.Label(self.docker_frame, text="Create Dockerfile",
                                          font=("Helvetica", 20, "bold"),
                                          bg=self.frame_color, fg="white")
@@ -58,6 +56,12 @@ class VMManagerGUI:
                                                   fg="white",
                                                   font=("Helvetica", 14))
         self.create_dockerfile_button.grid(row=5, column=3, columnspan=2, pady=15)
+
+        self.create_raw_dockerfile_button = tk.Button(self.docker_frame, text="Create Raw Dockerfile",
+                                                      command=self.create_rawdockerfile_popup, bg=self.button_color,
+                                                      fg="white",
+                                                      font=("Helvetica", 14))
+        self.create_raw_dockerfile_button.grid(row=6, column=3, columnspan=2, pady=15)
 
         self.build_docker_button = tk.Button(self.docker_frame, text="Build Docker Image",
                                              command=self.build_docker_image_popup, bg=self.button_color, fg="white",
@@ -116,7 +120,7 @@ class VMManagerGUI:
         self.disk_frame.pack(pady=20)
 
         self.disk_label = tk.Label(self.disk_frame, text="Create Disk Image", font=("Helvetica", 15, "bold"),
-                                    bg=self.frame_color, fg="white")
+                                   bg=self.frame_color, fg="white")
         self.disk_label.grid(row=0, column=0, columnspan=2, pady=15)
 
         self.create_disk_button = tk.Button(self.disk_frame, text="Create Image", command=self.createDisk,
@@ -128,12 +132,61 @@ class VMManagerGUI:
         self.boot_frame.pack(pady=30)
 
         self.boot_label = tk.Label(self.disk_frame, text="Boot Menu", font=("Helvetica", 15, "bold"),
-                                    bg=self.frame_color, fg="white")
+                                   bg=self.frame_color, fg="white")
         self.boot_label.grid(row=5, column=0, columnspan=2, pady=15)
 
         self.create_boot_button = tk.Button(self.disk_frame, text="Boot Menu", command=self.bootVM,
                                             bg=self.button_color, fg="white", font=("Helvetica", 14))
         self.create_boot_button.grid(row=7, column=0, columnspan=2, pady=15)
+    
+    def select_directory(self, entry):
+            directory_path = filedialog.askdirectory()
+            if directory_path:
+                entry.config(state="normal")
+                # Do something with the selected directory (e.g., print it)
+                
+                entry.delete(0, tk.END)  # Clear existing content
+                entry.insert(0, directory_path)
+                entry.config(state="readonly")
+    def create_rawdockerfile_popup(self):
+        def save_user_input( user_input,directory):
+            popup.destroy()
+            docker_instance.buildrawfile(user_input,directory)
+            self.show_output_popup("Docker build",f"Docker File was build succesfully in the path {directory}")
+            
+        popup = tk.Toplevel(self.master)
+        popup.title("Enter your input")
+        text_widget = tk.Text(popup, wrap="word", width=50, height=10)
+        text_widget.pack(padx=10, pady=10)
+        dir_entry = tk.Entry(popup, width=20)
+        dir_entry.pack(padx=10)
+        dir_entry.config(state="readonly")
+        directory_button = tk.Button(
+            popup,
+            text="Select Directory",
+            command=lambda: self.select_directory(dir_entry),
+            bg=self.button_color,
+            fg="white",
+            font=("Helvetica", 12)
+        )
+        directory_button.pack(pady=10)
+        
+        save_button = tk.Button(
+            popup,
+            text="Save",
+            command=lambda: save_user_input(text_widget.get("1.0", "end-1c"),dir_entry.get()),
+            bg=self.button_color,
+            fg="white",
+            font=("Helvetica", 12)
+        )
+        save_button.pack(pady=10)
+
+
+    
+        
+
+       
+
     def createDisk(self):
         self.diskWindow = tk.Toplevel(self.vmWindow)
         self.diskWindow.title("Create Disk Image")
@@ -183,6 +236,7 @@ class VMManagerGUI:
 
         cancel_button = tk.Button(self.diskWindow, text="Cancel", command=cancel, bg=self.button_color)
         cancel_button.pack()
+
     def bootVM(self):
 
         self.bootWindow = tk.Toplevel(self.vmWindow)
@@ -239,15 +293,14 @@ class VMManagerGUI:
         create_button = tk.Button(self.bootWindow, text="Boot", command=create)
         create_button.pack()
 
-
         cancel_button = tk.Button(self.bootWindow, text="Cancel", command=cancel)
         cancel_button.pack()
 
     # --------------------------------------------------------------------------------------------------
-    
-    #Docker function
+
+    # Docker function
     def create_dockerfile_popup(self):
-         def select_directory(entry):
+        def select_directory(entry):
             directory = filedialog.askdirectory()
             if directory:
                 entry.config(state="normal")
@@ -256,10 +309,11 @@ class VMManagerGUI:
                 entry.delete(0, tk.END)  # Clear existing content
                 entry.insert(0, text_to_write)
                 entry.config(state="readonly")
-         def on_dependency_click():
+
+        def on_dependency_click():
             value = checkbox_dependency_var.get()
-            
-            if value: # Clear existing content
+
+            if value:  # Clear existing content
                 dependencies_entry.config(state="normal")
                 dependencies_entry.delete(0, tk.END)
                 dependencies_entry.config(state="readonly")
@@ -267,11 +321,11 @@ class VMManagerGUI:
             else:
                 dependencies_entry.config(state='normal')
                 return False
-            
-         def on_port_click():
+
+        def on_port_click():
             value = checkbox_port_var.get()
-           
-            if value: # Clear existing content
+
+            if value:  # Clear existing content
                 port_entry.config(state="normal")
                 port_entry.delete(0, tk.END)
                 port_entry.config(state="readonly")
@@ -279,96 +333,101 @@ class VMManagerGUI:
             else:
                 port_entry.config(state='normal')
                 return False
-         popup = tk.Toplevel(self.docker_frame)
-         popup.title("Create Dockerfile")
-         popup.geometry("500x300")
-         popup.resizable(False, False)
-         
-         # Entry widgets for Dockerfile information
-         image_entry = tk.Entry(popup, width=20)
-         image_entry.grid(row=0, column=1, padx=10, pady=10)
-         workdir_entry = tk.Entry(popup, width=20)
-         workdir_entry.grid(row=1, column=1, padx=10, pady=10)
-         dir_entry = tk.Entry(popup, width=20)
-         dir_entry.grid(row=2, column=1, padx=10, pady=10)
-         dir_entry.config(state="readonly")
-         dependencies_entry = tk.Entry(popup, width=20)
-         dependencies_entry.grid(row=3, column=1, padx=10, pady=10)
-         port_entry = tk.Entry(popup, width=20)
-         port_entry.grid(row=4, column=1, padx=10, pady=10)
-         runname_entry = tk.Entry(popup, width=20)
-         runname_entry.grid(row=5, column=1, padx=10, pady=10)
-         checkbox_dependency_var = tk.BooleanVar()
-         checkbox_port_var = tk.BooleanVar()
 
-         checkbox_dependency = tk.Checkbutton(popup, text="Requirments.txt", variable=checkbox_dependency_var,command= lambda: on_dependency_click())
-         checkbox_dependency.grid(row=3, column=2, padx=10, pady=10)
-         checkbox_port = tk.Checkbutton(popup, text="No port", variable=checkbox_port_var,command= lambda: on_port_click())
-         checkbox_port.grid(row=4, column=2, padx=10, pady=10)
-         # Labels for Entry widgets
-         tk.Label(popup, text="Image Used:").grid(row=0, column=0, padx=10, pady=10)
-         tk.Label(popup, text="Work Directory in Docker:").grid(row=1, column=0, padx=10, pady=10)
-         tk.Label(popup, text="Directory of File:").grid(row=2, column=0, padx=10, pady=10)
-         tk.Label(popup, text="Dependencies:").grid(row=3, column=0, padx=10, pady=10)
-         tk.Label(popup, text="Port:").grid(row=4, column=0, padx=10, pady=10)
-         tk.Label(popup, text="File Run Name:").grid(row=5, column=0, padx=10, pady=10)
-         select_button = tk.Button(popup, text="Select Directory",command=lambda: select_directory(dir_entry))
-         select_button.grid(row=2,column=2,padx=10,pady=10)
-        
+        popup = tk.Toplevel(self.docker_frame)
+        popup.title("Create Dockerfile")
+        popup.geometry("500x400")
+        popup.resizable(False, False)
 
+        # Entry widgets for Dockerfile information
+        image_entry = tk.Entry(popup, width=20)
+        image_entry.grid(row=0, column=1, padx=10, pady=10)
+        workdir_entry = tk.Entry(popup, width=20)
+        workdir_entry.grid(row=1, column=1, padx=10, pady=10)
+        dir_entry = tk.Entry(popup, width=20)
+        dir_entry.grid(row=2, column=1, padx=10, pady=10)
+        dir_entry.config(state="readonly")
+        dependencies_entry = tk.Entry(popup, width=20)
+        dependencies_entry.grid(row=3, column=1, padx=10, pady=10)
+        port_entry = tk.Entry(popup, width=20)
+        port_entry.grid(row=4, column=1, padx=10, pady=10)
+        runname_entry = tk.Entry(popup, width=20)
+        runname_entry.grid(row=5, column=1, padx=10, pady=10)
+        checkbox_dependency_var = tk.BooleanVar()
+        checkbox_port_var = tk.BooleanVar()
+        extra_entry = tk.Entry(popup, width=20)
+        extra_entry.grid(row=6, column=1, padx=10, pady=10)
 
+        checkbox_dependency = tk.Checkbutton(popup, text="Requirments.txt", variable=checkbox_dependency_var,
+                                             command=lambda: on_dependency_click())
+        checkbox_dependency.grid(row=3, column=2, padx=10, pady=10)
+        checkbox_port = tk.Checkbutton(popup, text="No port", variable=checkbox_port_var,
+                                       command=lambda: on_port_click())
+        checkbox_port.grid(row=4, column=2, padx=10, pady=10)
+        # Labels for Entry widgets
 
-         # Function to handle button click
-         def create_dockerfile():
-             try:
-                 image_used = image_entry.get()
-                 work_directory = workdir_entry.get()
-                 directory_of_file = dir_entry.get()
-                 dependencies = dependencies_entry.get()
-                 port = port_entry.get()
-                 file_run_name = runname_entry.get()
-                 case_number="1"
-                 if(on_dependency_click()):
-                     case_number="2"
-                 if(on_port_click()):
-                     case_number="3"
-                 if(on_dependency_click() and on_port_click()):
-                     case_number= "4"
-                
+        tk.Label(popup, text="Image Used:").grid(row=0, column=0, padx=10, pady=10)
+        tk.Label(popup, text="Work Directory in Docker:").grid(row=1, column=0, padx=10, pady=10)
+        tk.Label(popup, text="Directory of File:").grid(row=2, column=0, padx=10, pady=10)
+        tk.Label(popup, text="Dependencies:").grid(row=3, column=0, padx=10, pady=10)
+        tk.Label(popup, text="Port:").grid(row=4, column=0, padx=10, pady=10)
+        tk.Label(popup, text="File Run Name:").grid(row=5, column=0, padx=10, pady=10)
+        tk.Label(popup, text="Extra content").grid(row=6, column=0, padx=10, pady=10)
+        select_button = tk.Button(popup, text="Select Directory", command=lambda: select_directory(dir_entry))
+        select_button.grid(row=2, column=2, padx=10, pady=10)
 
-                 docker_instance.imageused = image_used
-                 docker_instance.workdirectory = work_directory
-                 docker_instance.directoryoffile = directory_of_file
-                 docker_instance.dependencies = dependencies
-                 
-                 docker_instance.port = port
-                
-                 docker_instance.filerunname = file_run_name
-                 
-                 result = docker_instance.buildfile(case_number)
-                 
-                 if result:
-                     self.show_output_popup("Build Dockerfile Result", "Dockerfile created successfully.")
-                 else:
-                     self.show_output_popup("Build Dockerfile Error", "Error creating Dockerfile.")
+        # Function to handle button click
+        def create_dockerfile():
+            try:
+                image_used = image_entry.get()
+                work_directory = workdir_entry.get()
+                directory_of_file = dir_entry.get()
+                dependencies = dependencies_entry.get()
+                port = port_entry.get()
+                file_run_name = runname_entry.get()
+                extra_comments = extra_entry.get()
+                case_number = "1"
+                if (on_dependency_click()):
+                    case_number = "2"
+                if (on_port_click()):
+                    case_number = "3"
+                if (on_dependency_click() and on_port_click()):
+                    case_number = "4"
 
-                 popup.destroy()
-             except Exception as e:
-                 self.show_output_popup("Build Dockerfile Error", str(e))
+                docker_instance.imageused = image_used
+                docker_instance.workdirectory = work_directory
+                docker_instance.directoryoffile = directory_of_file
+                docker_instance.dependencies = dependencies
 
-         # Button to trigger Dockerfile creation
-         create_button = tk.Button(popup, text="Create Dockerfile", command=create_dockerfile, bg=self.button_color)
-         create_button.grid(row=6, column=0, columnspan=2, pady=10)
+                docker_instance.port = port
+                docker_instance.extra_comments = extra_comments
+                docker_instance.filerunname = file_run_name
+
+                result = docker_instance.buildfile(case_number)
+
+                if result:
+                    self.show_output_popup("Build Dockerfile Result", f"Dockerfile created successfully. In the path {directory_of_file}")
+                else:
+                    self.show_output_popup("Build Dockerfile Error", "Error creating Dockerfile.")
+
+                popup.destroy()
+            except Exception as e:
+                self.show_output_popup("Build Dockerfile Error", str(e))
+
+        # Button to trigger Dockerfile creation
+        create_button = tk.Button(popup, text="Create Dockerfile", command=create_dockerfile, bg=self.button_color)
+        create_button.grid(row=7, column=0, columnspan=3, pady=20)
 
     def show_container_list(self):
-         try:
-             result = docker_instance.list_containers()
-             container_list = result.stdout
+        try:
+            result = docker_instance.list_containers()
+            container_list = result.stdout
 
-             self.show_output_popup("Show All running contianers", container_list)
+            self.show_output_popup("Show All running contianers", container_list)
 
-         except subprocess.CalledProcessError as e:
-             self.show_output_popup("List Docker Containers Error", e.stderr)
+        except subprocess.CalledProcessError as e:
+            self.show_output_popup("List Docker Containers Error", e.stderr)
+
     def ask_pullimage_name(self):
         # Create a simple dialog to get the image name
         ask_pullimage_name = tk.simpledialog.askstring("Input", "Enter image name")
@@ -387,7 +446,7 @@ class VMManagerGUI:
         if image_name is not None and image_name.strip() != "":
             result = docker_instance.search_image(image_name)
             self.show_output_popup("Search for image", result.stdout)
-              # Call search_image as a method
+            # Call search_image as a method
             # Handle the result or update the GUI accordingly
 
     def ask_container_name(self):
@@ -398,6 +457,7 @@ class VMManagerGUI:
         if container_name is not None and container_name.strip() != "":
             result = docker_instance.list_containers(container_name)
             # Handle the result or update the GUI accordingly
+
     def ask_container_name_stop(self):
         # Create a simple dialog to get the container name
         container_name = tk.simpledialog.askstring("Input", "Enter container name")
@@ -407,6 +467,7 @@ class VMManagerGUI:
             self.Stop_container_popup(name=container_name)
 
             # Handle the result or update the GUI accordingly
+
     def run_docker_image_with_container_popup(self):
         popup = tk.Toplevel(self.docker_frame)
         popup.title("Run Docker Image with Container")
@@ -454,6 +515,7 @@ class VMManagerGUI:
                 entry.delete(0, tk.END)  # Clear existing content
                 entry.insert(0, text_to_write)
                 entry.config(state="readonly")
+
         popup = tk.Toplevel(self.docker_frame)
         popup.title("Build Docker Image")
         popup.geometry("400x150")
@@ -472,19 +534,19 @@ class VMManagerGUI:
         dir_entry = tk.Entry(popup, width=20)
         dir_entry.grid(row=1, column=1, padx=10, pady=10)
         dir_entry.config(state="readonly")
-        select_button = tk.Button(popup, text="Select Directory",command=lambda: select_directory(dir_entry))
-        select_button.grid(row=1,column=2,padx=10,pady=10)
-       
+        select_button = tk.Button(popup, text="Select Directory", command=lambda: select_directory(dir_entry))
+        select_button.grid(row=1, column=2, padx=10, pady=10)
+
         def run_image():
-            name= name_entry.get()
-            
+            name = name_entry.get()
+
             directory = dir_entry.get()
 
             try:
-                output=""
+                output = ""
                 result = docker_instance.build_image(name, directory)
                 try:
-                    
+
                     self.show_output_popup("build Docker Image w Result", result)
                 except:
                     self.show_output_popup("build Docker Image w Result", result.stdout)
@@ -494,7 +556,6 @@ class VMManagerGUI:
 
             popup.destroy()
 
-     
         run_button = tk.Button(popup, text="Run", command=run_image, bg=self.button_color)
         run_button.grid(row=2, column=0, columnspan=2, pady=10)
         self.bootWindow = tk.Toplevel(self.vmWindow)
@@ -562,24 +623,24 @@ class VMManagerGUI:
         except subprocess.CalledProcessError as e:
             self.show_output_popup("List Docker Images Error", e.stderr)
 
-    def Stop_container_popup(self,name):
-        lists=docker_instance.list_containers().stdout.split()
-        found=False
-        for i in range(19,len(lists),12):
-            if lists[i]==name:
-                found=True
+    def Stop_container_popup(self, name):
+        lists = docker_instance.list_containers().stdout.split()
+        found = False
+        for i in range(19, len(lists), 12):
+            if lists[i] == name:
+                found = True
 
         if found:
             try:
                 docker_instance.stop_container(name)
-                
+
                 self.show_output_popup("Stop container", "Container was stopped succesfully")
 
             except subprocess.CalledProcessError as e:
                 self.show_output_popup("Stop container", "There is no running container with this name")
         else:
             self.show_output_popup("Stop container", "There is no running container with this name")
-        
+
     def show_output_popup(self, title, content):
         output_popup = tk.Toplevel(self.master)
         output_popup.title(title)

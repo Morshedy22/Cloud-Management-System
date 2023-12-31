@@ -1,4 +1,7 @@
 import subprocess
+class str2(str):
+     def __repr__(self):
+         return ''.join(('"', super().__repr__()[1:-1], '"'))
 class docker:
     def __init__(self,directoryoffile=None,workdirectory=None,dependencies=None,port=None,filerunname=None,imageused=None):
         self.directoryoffile=directoryoffile
@@ -7,17 +10,40 @@ class docker:
         self.port=port
         self.filerunname=filerunname
         self.imageused=imageused
-        
+        self.extra_comments=''
 
+
+    def buildrawfile(self,content ,directory):
+        try:
+            full_path= directory + "/Dockerfile"
+            with open(full_path, "w") as dockerfile:
+                    dockerfile.write(content)
+                
+            return True
+        except:
+                return False
+        
     def buildfile(self,case_number):
+        
+            
         command="RUN pip install --no-cache-dir"
         if case_number=="1" or case_number=="3":
-            self.dependencies=self.dependencies.split()
-            txt=''
-            for i in self.dependencies:
-                txt= txt+ command
-                txt= txt + ' '+i
-                txt+='\n'
+            try:
+                self.dependencies=self.dependencies.split()
+                txt=''
+                for i in self.dependencies:
+                    txt= txt+ command
+                    txt= txt + ' '+i
+                    txt+='\n'
+            except:
+                txt=''
+        run_command=self.filerunname.split()
+        final_list=[]
+        for item in run_command:
+            final_list.append(str2(item))
+        print(final_list)
+
+        
 
             
         if case_number=="1":
@@ -32,9 +58,9 @@ class docker:
                 {txt}
 
                 EXPOSE {self.port}
-
+                {self.extra_comments}
             
-                CMD ["python", "{self.filerunname}"]
+                CMD {final_list}
                 """ 
                 full_path= self.directoryoffile + "/Dockerfile"
                 with open(full_path, "w") as dockerfile:
@@ -56,8 +82,8 @@ class docker:
 
                 EXPOSE {self.port}
 
-            
-                CMD ["python", "{self.filerunname}"]
+                {self.extra_comments}
+                CMD {final_list}
                 """ 
                 full_path= self.directoryoffile + "/Dockerfile"
                 with open(full_path, "w") as dockerfile:
@@ -76,10 +102,10 @@ class docker:
                 COPY . {self.workdirectory}
 
                 {txt}
-
+                {self.extra_comments}
 
             
-                CMD ["python", "{self.filerunname}"]
+                CMD {final_list}
                 """ 
                 full_path= self.directoryoffile + "/Dockerfile"
                 with open(full_path, "w") as dockerfile:
@@ -98,11 +124,11 @@ class docker:
                 COPY . {self.workdirectory}
 
                 RUN pip install --no-cache-dir -r requirements.txt
-
+                {self.extra_comments}
                 
 
             
-                CMD ["python", "{self.filerunname}"]
+                CMD {final_list}
                 """ 
                 full_path= self.directoryoffile + "/Dockerfile"
                 with open(full_path, "w") as dockerfile:
