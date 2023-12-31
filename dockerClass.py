@@ -1,4 +1,7 @@
 import subprocess
+class str2(str):
+     def __repr__(self):
+         return ''.join(('"', super().__repr__()[1:-1], '"'))
 class docker:
     def __init__(self,directoryoffile=None,workdirectory=None,dependencies=None,port=None,filerunname=None,imageused=None):
         self.directoryoffile=directoryoffile
@@ -37,7 +40,8 @@ class docker:
         run_command=self.filerunname.split()
         final_list=[]
         for item in run_command:
-            final_list.append(item.replace("'", '"'))
+            final_list.append(str2(item))
+        print(final_list)
 
         
 
