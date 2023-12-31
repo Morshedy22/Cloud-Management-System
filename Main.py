@@ -139,54 +139,6 @@ class VMManagerGUI:
                                             bg=self.button_color, fg="white", font=("Helvetica", 14))
         self.create_boot_button.grid(row=7, column=0, columnspan=2, pady=15)
     
-    def select_directory(self, entry):
-            directory_path = filedialog.askdirectory()
-            if directory_path:
-                entry.config(state="normal")
-                # Do something with the selected directory (e.g., print it)
-                
-                entry.delete(0, tk.END)  # Clear existing content
-                entry.insert(0, directory_path)
-                entry.config(state="readonly")
-    def create_rawdockerfile_popup(self):
-        def save_user_input( user_input,directory):
-            popup.destroy()
-            docker_instance.buildrawfile(user_input,directory)
-            self.show_output_popup("Docker build",f"Docker File was build succesfully in the path {directory}")
-            
-        popup = tk.Toplevel(self.master)
-        popup.title("Enter your input")
-        text_widget = tk.Text(popup, wrap="word", width=50, height=10)
-        text_widget.pack(padx=10, pady=10)
-        dir_entry = tk.Entry(popup, width=20)
-        dir_entry.pack(padx=10)
-        dir_entry.config(state="readonly")
-        directory_button = tk.Button(
-            popup,
-            text="Select Directory",
-            command=lambda: self.select_directory(dir_entry),
-            bg=self.button_color,
-            fg="white",
-            font=("Helvetica", 12)
-        )
-        directory_button.pack(pady=10)
-        
-        save_button = tk.Button(
-            popup,
-            text="Save",
-            command=lambda: save_user_input(text_widget.get("1.0", "end-1c"),dir_entry.get()),
-            bg=self.button_color,
-            fg="white",
-            font=("Helvetica", 12)
-        )
-        save_button.pack(pady=10)
-
-
-    
-        
-
-       
-
     def createDisk(self):
         self.diskWindow = tk.Toplevel(self.vmWindow)
         self.diskWindow.title("Create Disk Image")
@@ -299,6 +251,49 @@ class VMManagerGUI:
     # --------------------------------------------------------------------------------------------------
 
     # Docker function
+    def select_directory(self, entry):
+            directory_path = filedialog.askdirectory()
+            if directory_path:
+                entry.config(state="normal")
+                # Do something with the selected directory (e.g., print it)
+                
+                entry.delete(0, tk.END)  # Clear existing content
+                entry.insert(0, directory_path)
+                entry.config(state="readonly")
+    
+    def create_rawdockerfile_popup(self):
+        def save_user_input( user_input,directory):
+            popup.destroy()
+            docker_instance.buildrawfile(user_input,directory)
+            self.show_output_popup("Docker build",f"Docker File was build succesfully in the path {directory}")
+            
+        popup = tk.Toplevel(self.master)
+        popup.title("Enter your input")
+        text_widget = tk.Text(popup, wrap="word", width=50, height=10)
+        text_widget.pack(padx=10, pady=10)
+        dir_entry = tk.Entry(popup, width=20)
+        dir_entry.pack(padx=10)
+        dir_entry.config(state="readonly")
+        directory_button = tk.Button(
+            popup,
+            text="Select Directory",
+            command=lambda: self.select_directory(dir_entry),
+            bg=self.button_color,
+            fg="white",
+            font=("Helvetica", 12)
+        )
+        directory_button.pack(pady=10)
+        
+        save_button = tk.Button(
+            popup,
+            text="Save",
+            command=lambda: save_user_input(text_widget.get("1.0", "end-1c"),dir_entry.get()),
+            bg=self.button_color,
+            fg="white",
+            font=("Helvetica", 12)
+        )
+        save_button.pack(pady=10)
+
     def create_dockerfile_popup(self):
         def select_directory(entry):
             directory = filedialog.askdirectory()

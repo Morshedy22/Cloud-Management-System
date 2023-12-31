@@ -43,9 +43,6 @@ class docker:
             final_list.append(str2(item))
         print(final_list)
 
-        
-
-            
         if case_number=="1":
             try:
                 content=f"""\
