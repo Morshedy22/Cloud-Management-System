@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import simpledialog
+from tkinter import messagebox
 #import multiprocess as mp
 from qemuClass import *
 import subprocess
@@ -175,9 +176,34 @@ class VMManagerGUI:
         space.pack()
 
         def create():
-            name = name_input.get()
-            size = size_input.get()
-            location = location_label.cget("text")
+            try:
+                name = name_input.get()
+                size = size_input.get()
+                location = location_label.cget("text")
+                
+
+                if not name:
+                    raise ValueError("Name cannot be empty")
+                
+                try:
+                    s_size = int(size)
+                    if s_size <= 0:
+                        raise ValueError("Size must be a positive integer.")
+
+                    try:
+                        print ("location :",location)
+                        print(location == "Location")     
+                        if (location == "Location") or not location:
+                            raise ValueError("Location must added")
+
+                    except ValueError:
+                        raise ValueError("Location must added")
+                
+                except ValueError:
+                    raise ValueError("Size must be a positive integer")
+            except ValueError as e:
+                messagebox.showerror("Error", str(e))
+
             self.vm.CreateImage(name, size, location)
 
         def cancel():
